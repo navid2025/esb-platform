@@ -8,9 +8,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>services/esb-orchestration-service</module>
-        <module>services/esb-security-service</module>
         <module>services/esb-adapter-service</module>
-        <module>services/esb-gateway-service</module>
         <module>services/esb-mediation-service</module>
         <module>services/esb-monitoring-service</module>
         <module>services/esb-common</module>
@@ -30,41 +28,94 @@
         <surefire-plugin.version>3.5.3</surefire-plugin.version>
         <java.version>21</java.version>
         <camel.version>3.23.2</camel.version>
+        <lombok.version>1.18.32</lombok.version>
     </properties>
 
     <dependencyManagement>
+
         <dependencies>
-            <!-- Quarkus BOM -->
+            <!-- Quarkus BOM: manages Quarkus + extensions -->
             <dependency>
-                <groupId>${quarkus.platform.group-id}</groupId>
-                <artifactId>${quarkus.platform.artifact-id}</artifactId>
-                <version>${quarkus.platform.version}</version>
+                <groupId>io.quarkus</groupId>
+                <artifactId>quarkus-bom</artifactId>
+                <version>3.26.1</version> <!-- stable LTS -->
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-                        <!-- Module-specific dependencies -->
+
+            <dependency>
+                <groupId>io.quarkus</groupId>
+                <artifactId>quarkus-resteasy-reactive</artifactId>
+                <version>3.8.2</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.quarkus</groupId>
+                <artifactId>quarkus-resteasy-reactive-jackson</artifactId>
+                <version>3.8.2</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.quarkus</groupId>
+                <artifactId>quarkus-smallrye-reactive-messaging-kafka</artifactId>
+                <version>3.8.2</version>
+            </dependency>
+
+            <!-- ✅ CXF for SOAP -->
             <dependency>
                 <groupId>io.quarkiverse.cxf</groupId>
                 <artifactId>quarkus-cxf</artifactId>
-                <version>1.5.0</version>
+                <version>2.5.0</version>
             </dependency>
+
+            <!-- Apache Kafka Clients -->
             <dependency>
-                <groupId>org.camunda.bpm</groupId>
-                <artifactId>camunda-engine</artifactId>
-                <version>7.20.0</version>
+                <groupId>org.apache.kafka</groupId>
+                <artifactId>kafka-clients</artifactId>
+                <version>4.0.0</version>
             </dependency>
+
+            <!-- Jackson (for DTOs) -->
             <dependency>
-                <groupId>co.elastic.clients</groupId>
-                <artifactId>elasticsearch-java</artifactId>
-                <version>8.13.0</version>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>2.19.2</version>
             </dependency>
+            <!-- Lombok -->
             <dependency>
-                <groupId>org.keycloak</groupId>
-                <artifactId>keycloak-admin-client</artifactId>
-                <version>21.1.1</version>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>1.18.36</version>
+                <scope>provided</scope>
             </dependency>
+
         </dependencies>
     </dependencyManagement>
+
+    <!-- Common dependencies for all modules -->
+    <dependencies>
+        <!-- Logging -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-logging-json</artifactId>
+        </dependency>
+
+        <!-- JSON-B (Quarkus default JSON) -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-jsonb</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+    </dependencies>
 
     <build>
         <pluginManagement>
@@ -90,6 +141,16 @@
                     <version>${compiler-plugin.version}</version>
                     <configuration>
                         <parameters>true</parameters>
+                        <source>${java.version}</source>
+                        <target>${java.version}</target>
+                        <release>${java.version}</release>
+                        <annotationProcessorPaths>
+                            <path>
+                                <groupId>org.projectlombok</groupId>
+                                <artifactId>lombok</artifactId>
+                                <version>${lombok.version}</version>
+                            </path>
+                        </annotationProcessorPaths>
                     </configuration>
                 </plugin>
                 <plugin>
